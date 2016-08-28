@@ -2,7 +2,7 @@
 
 
 class Mru(object):
-    """Comienzo de la clase."""
+    """Movimiento rectilineo uniforme."""
 
     def __init__(self, pos, vel, t=0):
         """Mru(position, speed, time)."""

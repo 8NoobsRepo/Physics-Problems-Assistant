@@ -8,17 +8,13 @@ class Mru(object):
     def __init__(self, pos, vel, t=0):
         """Constructor Class."""
         self.pos = pos
-        try:
-            assert vel >= 0
-            self.vel = vel
-        except AssertionError:
-            raise AssertionError("La velocidad introducida es menor a 0")
-
-        try:
-            assert t >= 0
-            self.t = t
-        except AssertionError:
-            raise AssertionError("El tiempo introducido es menor a 0")
+        self.vel = vel
+        if t is not None:
+            try:
+                assert t >= 0
+                self.t = t
+            except AssertionError:
+                raise AssertionError("El tiempo introducido es menor a 0")
 
     def __str__(self):
         """String method."""
@@ -35,6 +31,25 @@ class Mru(object):
         x = str(self.pos - self.vel * self.t)
         print "x(t) = " + x + " + " + v + "t (Ecuacion del movimiento)"
         print "v = " + v + " (Ecuacion de la velocidad)"
+
+    def init_pos(self, pos, t):
+        """Devuelve la posicion inicial del movil.
+
+        Datos: tiempo y la distancia recorrida en ese tiempo.
+        """
+        if self.pos is None:
+            return pos - self.vel * (t - self.t)
+        else:
+            return self.pos
+
+    def init_vel(self, pos, t):
+        """Devuelve la velocidad inicial del movil.
+
+        Datos: tiempo y la distancia recorrida en ese tiempo.
+
+        """
+        if self.vel is None:
+            return (pos - self.pos) / float((t - self.t))
 
     def dist_rec(self, tiempo):
         """Retorna la distancia recorrida en el tiempo dado."""

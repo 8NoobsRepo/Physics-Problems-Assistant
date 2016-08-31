@@ -92,17 +92,60 @@ class Mrua(Mru, object):
                "%st (Ecuacion de la velocidad)" % str(self.ace))
         print "a(t) = %s (Ecuacion de la aceleracion)" % str(self.ace)
 
+    def init_spd(self, v, t):
+        """Devuelve velocidad inicial.
+
+        Datos: tiempo y velocidad en ese tiempo.
+
+        """
+        if self.vel is None:
+            return v - self.ace * (t - self.t)
+        else:
+            return self.vel
+
+    def init_spd2(self, v, d):
+        """Devuelve la velocidad inicial. Variante.
+
+        Datos: Distancia recorrida en un tiempo t
+
+        y la velocidad en ese instante t.
+
+        Aviso: No nos hace falta saber el t.
+
+        """
+        if self.vel is None:
+            return math.sqrt(v**2 - 2 * self.ace * d)
+        else:
+            return self.vel
+
+    def init_pos(self, pos, t):
+        """Devuelve la posicion inicial.
+
+        Datos: tiempo y posicion en ese tiempo.
+
+        """
+        if self.pos is None:
+            return (pos - self.vel * (t - self.t) - 0.5 * self.ace *
+                    (t - self.t)**2)
+        else:
+            return self.pos
+
     def spd_rch(self, t):
         """Velocidad alcanzada en un tiempo t."""
-        return self.vel + self.ace * t
+        return self.vel + self.ace * (t - self.t)
+
+    def spd_dis(self, d):
+        """Velocidad alcanzada en una distancia d."""
+        return math.sqrt(self.vel**2 + 2 * self.ace * d)
 
     def pos_rch(self, t):
         """Posicion alcanzada en un tiempo t."""
-        return self.pos + self.vel * t + 0.5 * self.ace * t**2
+        return (self.pos + self.vel * (t - self.t) + 0.5 * self.ace *
+                (t - self.t)**2)
 
-    def time_spd(self, vel):
+    def time_spd(self, v):
         """Tiempo que tarda el movil en alcanzar una velocidad vel."""
-        return (vel - self.pos) / (float(self.ace)) + self.t
+        return (v - self.vel) / (float(self.ace)) + self.t
 
     def time_pos(self, pos):
         """Tiempo que tarda el movil en alcanzar una posicion pos."""
@@ -130,22 +173,81 @@ class Mrua(Mru, object):
         else:
             return [sol1, sol2]
 
+    def dist_rch(self, v):
+        """Distancia total recorrida.
+
+        Datos: Velocidad final
+
+        """
+        return (v**2 - self.vel**2) / (float(2 * self.ace))
+
 
 class FreeFall(Mrua, object):
     """Caso particular de Mrua."""
 
     def __init__(self, altura, vel, t=0):
         """Class Constructor."""
-        Mrua.__init__(self, altura, vel, -9.8, t)
+        if vel is None:
+            Mrua.__init__(self, altura, vel, -9.8, t)
+        else:
+            Mrua.__init__(self, altura, -vel, -9.8, t)
 
     def __str__(self):
         """String method."""
         return Mrua.__str__(self)
 
-    def dist_to_floor(self, t):
-        """Devuelve la altura a la que se encuentra el movil.
+    def init_spd(self, v, t):
+        """Devuelve velocidad inicial.
 
-        Datos de entrada: tiempo de caida.
+        Datos: tiempo y velocidad en ese tiempo.
 
         """
-        return Mrua.time_pos(self, t)
+        if self.vel is None:
+            return v + self.ace * (t - self.t)
+        else:
+            return self.vel
+
+    def init_spd2(self, v, d):
+        """Devuelve la velocidad inicial. Variante.
+
+        Datos: Distancia recorrida en un tiempo t
+
+        y la velocidad en ese instante t.
+
+        Aviso: No nos hace falta saber el t.
+
+        """
+        if self.vel is None:
+            return math.sqrt(v**2 + 2 * self.ace * d)
+        else:
+            return self.vel
+
+    def spd_rch(self, t):
+        """Velocidad alcanzada en un tiempo t."""
+        return abs(Mrua.spd_rch(self, t))
+
+    def spd_dis(self, d):
+        """Velocidad alcanzada en una distancia d."""
+        return math.sqrt(self.vel**2 - 2 * self.ace * d)
+
+    def time_spd(self, v):
+        """Tiempo que tarda el movil en alcanzar una velocidad vel."""
+        return (v - self.vel) / (-(self.ace)) + self.t
+
+    def time_pos(self, pos):
+        """Devuelve el tiempo que tarda en caer hasta una posicion h.
+
+        determinada.
+
+        Datos: Altura.
+
+        """
+        return Mrua.time_pos(self, pos)
+
+    def dist_rch(self, v):
+        """Distancia total recorrida.
+
+        Datos: Velocidad final
+
+        """
+        return abs(Mrua.dist_rch(self, v))
